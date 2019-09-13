@@ -1,0 +1,55 @@
+plugins {
+    id 'groovy'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.41'
+}
+
+group 'com.hallysonh'
+version '1.0'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "http://jasperreports.sourceforge.net/maven2/" }
+}
+
+//create a single Jar with all dependencies
+jar {
+    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
+    manifest {
+        attributes(
+            // 'Class-Path': configurations.runtime.files.collect { it.getName() }.join(' '),
+            'Main-Class': 'com.hallyson.jasperconverter.MainKt',
+        )
+    }
+
+    // This line of code recursively collects and copies all of a project's files
+    // and adds them to the JAR itself. One can extend this task, to skip certain
+    // files or particular types at will
+    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.3.11'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "net.sf.jasperreports:jasperreports:6.9.0"
+    implementation 'com.lowagie:itext:2.1.7.js5'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+task copyTask(type: Copy) {
+    from 'scripts/.'
+    into 'build/libs'
+}
+
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin/'
+    test.java.srcDirs += 'src/test/kotlin/'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
